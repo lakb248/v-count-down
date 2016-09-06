@@ -1,55 +1,127 @@
 <template>
     <div class="count-down-container">
-        <div class="count-down-hour count-down-item">
-            <div class="count-down-number">
-                <div class="card top">
-                    <div class="top-half current-count"></div>
-                    <div class="back bottom-half">
-                        <div class="next-count adjuct"></div>
-                    </div>
-                </div>
-                <div class="card middle">
-                    <div class="top-half next-count"></div>
-                </div>
-                <div class="card bottom current-count"></div>
-            </div>
-        </div>
-        <div class="count-down-split">:</div>
-        <div class="count-down-minute count-down-item">
-            <div class="count-down-number">
-                <div class="card top">
-                    <div class="top-half current-count"></div>
-                    <div class="back bottom-half">
-                        <div class="next-count adjuct"></div>
-                    </div>
-                </div>
-                <div class="card middle">
-                    <div class="top-half next-count"></div>
-                </div>
-                <div class="card bottom current-count"></div>
-            </div>
-        </div>
-        <div class="count-down-split">:</div>
-        <div class="count-down-second count-down-item">
-            <div class="count-down-number">
-                <div class="card top">
-                    <div class="top-half current-count"></div>
-                    <div class="back bottom-half">
-                        <div class="next-count adjuct"></div>
-                    </div>
-                </div>
-                <div class="card middle">
-                    <div class="top-half next-count"></div>
-                </div>
-                <div class="card bottom current-count"></div>
-            </div>
-        </div>
+        {{hours}}:{{minutes}}:{{seconds}}
     </div>
 </template>
 
 <script>
+    var isValidDate = date => {
+        if (typeof date === 'object') {
+            if (isNaN(date.getTime())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    };
+    var formatMillisecond = milliseconds => {
+        milliseconds = milliseconds || 0;
+        // var days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+        var hours = Math.floor(milliseconds / (1000 * 60 * 60)) % 24;
+        var minutes = Math.floor(milliseconds / (1000 * 60)) % 60;
+        var seconds = Math.floor(milliseconds / 1000) % 60;
+        return {
+            // days: days,
+            hours: hours >= 10 ? hours : ('0' + hours),
+            minutes: minutes >= 10 ? minutes : ('0' + minutes),
+            seconds: seconds >= 10 ? seconds : ('0' + seconds)
+        };
+    };
     export default {
-        props: ['startTime', 'endTime', 'onTimeout']
+        props: ['startTime', 'endTime', 'duration', 'onTimeout'],
+        data() {
+            return {
+                hours: '00',
+                minutes: '00',
+                seconds: '00',
+                startTimestamp: 0,
+                endTimestamp: 0,
+                timeout: -1,
+                interval: 1000,
+                count: 0,
+                baseTimestamp: new Date().getTime()
+            };
+        },
+        methods: {
+            countDown(callback) {
+                var nextTime = 0;
+                if (this.count === 0) {
+                    // ths startTime need to be calibrated on first count down
+                    nextTime = 1000 - this.startTimestamp % 1000;
+                    this.startTimestamp = this.startTimestamp + nextTime;
+                    this.baseTimestamp = this.baseTimestamp + nextTime;
+                    this.duration -= nextTime;
+                } else {
+                    var offset = this.startTimestamp + (new Date().getTime() -
+                        this.baseTimestamp) - (this.startTimestamp +
+                        (this.count - 1) * this.interval);
+                    nextTime = this.interval - offset;
+                    this.duration -= this.interval;
+                }
+                this.count ++;
+                if (nextTime < 0) {
+                    nextTime = 0;
+                }
+
+                if (callback && typeof callback === 'function') {
+                    callback(this.duration);
+                }
+                if (this.duration <= 0) {
+                    clearTimeout(this.timeout);
+                } else {
+                    this.timeout = setTimeout(() => {
+                        this.countDown(duration => {
+                            if (callback && typeof callback === 'function') {
+                                callback(duration);
+                            }
+                        });
+                    }, nextTime);
+                }
+            },
+            updateCountDown(duration) {
+                var formatedDuration = formatMillisecond(this.duration);
+                this.hours = formatedDuration.hours;
+                this.minutes = formatedDuration.minutes;
+                this.seconds = formatedDuration.seconds;
+            }
+        },
+        ready() {
+            // if duration is not given, use endTime to calculate the duration
+            if (!this.duration) {
+                var startTime = new Date(this.startTime);
+                var endTime = new Date(this.endTime);
+                if (!isValidDate(startTime)) {
+                    startTime = new Date();
+                }
+                if (!isValidDate(endTime)) {
+                    endTime = new Date();
+                }
+                this.duration = endTime.getTime() - startTime.getTime();
+                this.startTimestamp = startTime.getTime();
+                this.endTimestamp = endTime.getTime();
+            } else {
+                // else calculate the endTime by duration
+                this.startTimestamp = new Date().getTime();
+                this.endTimestamp = this.startTimestamp + this.duration;
+            }
+
+            if (this.duration > 0) {
+                clearTimeout(this.timeout);
+                this.countDown(duration => {
+                    if (duration <= 0) {
+                        if (this.onTimeout &&
+                            typeof this.onTimeout === 'function') {
+                            this.onTimeout();
+                        }
+                        this.duration = 0;
+                    }
+                    this.updateCountDown(this.duration);
+                });
+            } else {
+                this.duration = 0;
+                this.updateCountDown(0);
+            }
+        }
     };
 </script>
 
@@ -60,9 +132,9 @@
     $count-down-width: 60px;
     $border-radius: 5px;
     .count-down-container {
+        display: inline-block;
         height: $count-down-height;
         line-height: $count-down-number-height;
-        font-family: "微软雅黑", "Microsoft Yahei";
     }
     .count-down-item {
         float: left;
@@ -73,76 +145,12 @@
         color: #fff;
         overflow: hidden;
         border-radius: $border-radius;
-        div {
-            border-radius: $border-radius;
-        }
-    }
-    .count-down-number {
-        width: 100%;
-        height: $count-down-number-height;
-        line-height: $count-down-number-height;
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-        padding: 0px 10px;
-        position: relative;
-    }
-    .card {
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        right: 0px;
-        bottom: 0px;
-    }
-    .top {
-        z-index: 3;
-        -moz-transform-style: preserve-3d;
-        -webkit-transform-style: preserve-3d;
-        transform-style:preserve-3d;
-    }
-    .middle {
-        z-index: 2;
-    }
-    .bottom {
-        z-index: 1;
-    }
-    .bottom-half, .top-half {
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        height: 50%;
-        width: 100%;
-        background-color: #2c3133;
-        overflow: hidden;
-        -webkit-backface-visibility: hidden;
-        -moz-backface-visibility: hidden;
-        backface-visibility: hidden;
-    }
-    .count-down-unit {
-        width: 100%;
-        height: $count-down-unit-height;
-        line-height: $count-down-unit-height;
-        text-align: center;
-        font-size: 12px;
-        padding: 0px 10px;
-    }
-    .back {
-        -webkit-transform: rotateX(180deg);
-        -moz-transform: rotateX(180deg);
-        -o-transform: rotateX(180deg);
-        -ms-transform: rorateX(180deg);
-        transform: rotateX(180deg);
-        display: none\0;
-    }
-    .adjuct {
-        height: 100%;
-        line-height: 0px;
     }
     .count-down-split {
         float: left;
         width: 15px;
         text-align: center;
-        color: #fff;
+        color: #000;
         height: $count-down-height;
         line-height: $count-down-height;
     }
