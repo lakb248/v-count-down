@@ -1,6 +1,95 @@
 <template>
-    <div class="count-down-container">
-        {{hours}}:{{minutes}}:{{seconds}}
+    <div class="count-down-container" v-bind:class="{'finished': duration <= 0}">
+        <div class="count-down-group">
+            <div class="count-down-hour count-down-item">
+                <div class="count-down-number">
+                    <div class="card top">
+                        <div class="top-half current-count">0</div>
+                        <div class="back bottom-half">
+                            <div class="next-count adjuct">0</div>
+                        </div>
+                    </div>
+                    <div class="card middle">
+                        <div class="top-half next-count">0</div>
+                    </div>
+                    <div class="card bottom current-count">0</div>
+                </div>
+            </div>
+            <div class="count-down-hour count-down-item">
+                <div class="count-down-number">
+                    <div class="card top">
+                        <div class="top-half current-count">0</div>
+                        <div class="back bottom-half">
+                            <div class="next-count adjuct">0</div>
+                        </div>
+                    </div>
+                    <div class="card middle">
+                        <div class="top-half next-count">0</div>
+                    </div>
+                    <div class="card bottom current-count">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="count-down-group">
+            <div class="count-down-minute count-down-item">
+                <div class="count-down-number">
+                    <div class="card top">
+                        <div class="top-half current-count">0</div>
+                        <div class="back bottom-half">
+                            <div class="next-count adjuct">0</div>
+                        </div>
+                    </div>
+                    <div class="card middle">
+                        <div class="top-half next-count">0</div>
+                    </div>
+                    <div class="card bottom current-count">0</div>
+                </div>
+            </div>
+            <div class="count-down-minute count-down-item">
+                <div class="count-down-number">
+                    <div class="card top">
+                        <div class="top-half current-count">0</div>
+                        <div class="back bottom-half">
+                            <div class="next-count adjuct">0</div>
+                        </div>
+                    </div>
+                    <div class="card middle">
+                        <div class="top-half next-count">0</div>
+                    </div>
+                    <div class="card bottom current-count">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="count-down-group">
+            <div class="count-down-second count-down-item">
+                <div class="count-down-number">
+                    <div class="card top">
+                        <div class="top-half current-count">0</div>
+                        <div class="back bottom-half">
+                            <div class="next-count adjuct">0</div>
+                        </div>
+                    </div>
+                    <div class="card middle">
+                        <div class="top-half next-count">0</div>
+                    </div>
+                    <div class="card bottom current-count">0</div>
+                </div>
+            </div>
+            <div class="count-down-second count-down-item">
+                <div class="count-down-number">
+                    <div class="card top">
+                        <div class="top-half current-count">0</div>
+                        <div class="back bottom-half">
+                            <div class="next-count adjuct">0</div>
+                        </div>
+                    </div>
+                    <div class="card middle">
+                        <div class="top-half next-count">0</div>
+                    </div>
+                    <div class="card bottom current-count">0</div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -22,18 +111,15 @@
         var seconds = Math.floor(milliseconds / 1000) % 60;
         return {
             // days: days,
-            hours: hours >= 10 ? hours : ('0' + hours),
-            minutes: minutes >= 10 ? minutes : ('0' + minutes),
-            seconds: seconds >= 10 ? seconds : ('0' + seconds)
+            hour: hours >= 10 ? [Math.floor(hours/10), hours % 10] : [0, hours],
+            minute: minutes >= 10 ? [Math.floor(minutes/10), minutes % 10] : [0, minutes],
+            second: seconds >= 10 ? [Math.floor(seconds/10), seconds % 10] : [0, seconds]
         };
     };
     export default {
         props: ['startTime', 'endTime', 'duration', 'onTimeout'],
         data() {
             return {
-                hours: '00',
-                minutes: '00',
-                seconds: '00',
                 startTimestamp: 0,
                 endTimestamp: 0,
                 timeout: -1,
@@ -79,10 +165,32 @@
                 }
             },
             updateCountDown(duration) {
-                var formatedDuration = formatMillisecond(this.duration);
-                this.hours = formatedDuration.hours;
-                this.minutes = formatedDuration.minutes;
-                this.seconds = formatedDuration.seconds;
+                var formatedDuration = formatMillisecond(duration);
+                for (var key in formatedDuration) {
+                    if (formatedDuration.hasOwnProperty(key)) {
+                        this.renderCountDown(key, 0, formatedDuration[key][0]);
+                        this.renderCountDown(key, 1, formatedDuration[key][1]);
+                    }
+                }
+            },
+            renderCountDown(unit, bit, val) {
+                var countDownUI = this.$el.querySelectorAll('.count-down-' + unit)[bit];
+                var top = countDownUI.querySelector('.top');
+                var nextCounts = countDownUI.querySelectorAll('.next-count');
+                var currentCounts = countDownUI.querySelectorAll('.current-count');
+
+                if (val !== +currentCounts[0].innerHTML) {
+                    top.style.transition = 'transform .5s linear';
+                    top.style.transform = 'rotateX(180deg)';
+                    nextCounts[0].innerHTML = val;
+                    nextCounts[1].innerHTML = val;
+                    setTimeout(function () {
+                        currentCounts[0].innerHTML = val;
+                        currentCounts[1].innerHTML = val;
+                        top.style.transition = 'none';
+                        top.style.transform = 'rotateX(0deg)';
+                    }, 500);
+                }
             }
         },
         ready() {
@@ -125,34 +233,97 @@
     };
 </script>
 
-<style lang="sass">
-    $count-down-height: 40px;
-    $count-down-number-height: 40px;
-    $count-down-unit-height: $count-down-height - $count-down-number-height;
-    $count-down-width: 60px;
+<style lang="sass" scoped>
+    $count-down-height: 48px;
+    $count-down-number-height: 48px;
+    $count-down-line-height: 53px;
+    $count-down-width: 30px;
     $border-radius: 5px;
     .count-down-container {
-        display: inline-block;
         height: $count-down-height;
-        line-height: $count-down-number-height;
+        line-height: $count-down-line-height;
+        font-family: "微软雅黑", "Microsoft Yahei", "STHeiti";
+        color: #ffc600;
+        &.finished {
+            color: #ddd;
+        }
+    }
+    .count-down-group {
+        float: left;
+        margin-right: 10px;
+        &:nth-of-type(3) {
+            margin-right: 0px;
+        }
+        .count-down-item:nth-of-type(2) {
+            margin-right: 0px;
+        }
     }
     .count-down-item {
         float: left;
         min-width: $count-down-width;
         height: $count-down-height;
-        line-height: $count-down-height;
-        background-color: #2c3133;
-        color: #fff;
+        margin-right: 1px;
         overflow: hidden;
-        border-radius: $border-radius;
     }
-    .count-down-split {
-        float: left;
-        width: 15px;
+    .count-down-number {
+        width: 100%;
+        height: $count-down-number-height;
         text-align: center;
-        color: #000;
-        height: $count-down-height;
-        line-height: $count-down-height;
+        font-size: 40px;
+        font-weight: bold;
+        position: relative;
     }
-
+    .card {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+    }
+    .top {
+        z-index: 3;
+        -moz-transform-style: preserve-3d;
+        -webkit-transform-style: preserve-3d;
+        transform-style:preserve-3d;
+    }
+    .middle {
+        z-index: 2;
+    }
+    .bottom {
+        z-index: 1;
+        background: url(./asserts/count-down-bg.png) no-repeat center center;
+        background-size: 30px 48px;
+    }
+    .bottom-half, .top-half {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        height: 50%;
+        width: 100%;
+        background-color: #2c3133;
+        overflow: hidden;
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .bottom-half {
+        background: url(./asserts/count-down-bg.png) no-repeat center -24px;
+        background-size: 30px 48px;
+    }
+    .top-half {
+        background: url(./asserts/count-down-half.png) no-repeat center center;
+        background-size: 30px 24px;
+    }
+    .back {
+        -webkit-transform: rotateX(180deg);
+        -moz-transform: rotateX(180deg);
+        -o-transform: rotateX(180deg);
+        -ms-transform: rorateX(180deg);
+        transform: rotateX(180deg);
+        display: none\0;
+    }
+    .adjuct {
+        height: 100%;
+        line-height: $count-down-line-height - $count-down-number-height;
+    }
 </style>
