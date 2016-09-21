@@ -94,6 +94,11 @@
 </template>
 
 <script>
+    /**
+     * whether the given date is a valid date object
+     * @param  {Date}  date the given date
+     * @return {Boolean} the result
+     */
     var isValidDate = date => {
         if (typeof date === 'object') {
             if (isNaN(date.getTime())) {
@@ -103,12 +108,19 @@
         }
         return false;
     };
+
+    /**
+     * format the milliseconds to object
+     * @param  {Integer} milliseconds the milliseconds
+     * @return {Object} the object after being formatted
+     */
     var formatMillisecond = milliseconds => {
         milliseconds = milliseconds || 0;
         // var days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
         var hours = Math.floor(milliseconds / (1000 * 60 * 60)) % 24;
         var minutes = Math.floor(milliseconds / (1000 * 60)) % 60;
-        var seconds = Math.floor(milliseconds / 1000) % 60;
+        var seconds = Math.ceil(milliseconds / 1000) % 60;
+        console.log(seconds);
         return {
             // days: days,
             hour: hours >= 10 ? [Math.floor(hours/10), hours % 10] : [0, hours],
@@ -116,11 +128,13 @@
             second: seconds >= 10 ? [Math.floor(seconds/10), seconds % 10] : [0, seconds]
         };
     };
+
+    const SPEED = 800;
+
     export default {
-        props: ['startTime', 'endTime', 'duration', 'onTimeout'],
+        props: ['endTime', 'duration', 'onTimeout'],
         data() {
             return {
-                startTimestamp: 0,
                 endTimestamp: 0,
                 timeout: -1,
                 interval: 1000,
@@ -133,38 +147,34 @@
                 var nextTime = 0;
                 if (this.count === 0) {
                     // ths startTime need to be calibrated on first count down
-                    nextTime = 1000 - this.startTimestamp % 1000;
-                    this.startTimestamp = this.startTimestamp + nextTime;
-                    this.baseTimestamp = this.baseTimestamp + nextTime;
+                    nextTime = this.duration % 1000;
+                    this.baseTimestamp +=  nextTime;
                     this.duration -= nextTime;
                 } else {
-                    var offset = this.startTimestamp + (new Date().getTime() -
-                        this.baseTimestamp) - (this.startTimestamp +
-                        (this.count - 1) * this.interval);
+                    var offset = new Date().getTime() - this.baseTimestamp - (this.count - 1) * this.interval;
                     nextTime = this.interval - offset;
                     this.duration -= this.interval;
+
                 }
                 this.count ++;
                 if (nextTime < 0) {
                     nextTime = 0;
                 }
 
-                if (callback && typeof callback === 'function') {
-                    callback(this.duration);
-                }
                 if (this.duration <= 0) {
                     clearTimeout(this.timeout);
+                    if (callback && typeof callback === 'function') {
+                        callback(this.duration);
+                    }
                 } else {
                     this.timeout = setTimeout(() => {
-                        this.countDown(duration => {
-                            if (callback && typeof callback === 'function') {
-                                callback(duration);
-                            }
-                        });
+                        this.updateCountDown(this.duration);
+                        this.countDown(callback);
                     }, nextTime);
                 }
             },
             updateCountDown(duration) {
+                console.log('update:', duration);
                 var formatedDuration = formatMillisecond(duration);
                 for (var key in formatedDuration) {
                     if (formatedDuration.hasOwnProperty(key)) {
@@ -180,7 +190,7 @@
                 var currentCounts = countDownUI.querySelectorAll('.current-count');
 
                 if (val !== +currentCounts[0].innerHTML) {
-                    top.style.transition = 'transform .5s linear';
+                    top.style.transition = 'transform ' + SPEED / 1000 + 's linear';
                     top.style.transform = 'rotateX(180deg)';
                     nextCounts[0].innerHTML = val;
                     nextCounts[1].innerHTML = val;
@@ -189,45 +199,33 @@
                         currentCounts[1].innerHTML = val;
                         top.style.transition = 'none';
                         top.style.transform = 'rotateX(0deg)';
-                    }, 500);
+                    }, SPEED);
                 }
             }
         },
         ready() {
             // if duration is not given, use endTime to calculate the duration
             if (!this.duration) {
-                var startTime = new Date(this.startTime);
                 var endTime = new Date(this.endTime);
-                if (!isValidDate(startTime)) {
-                    startTime = new Date();
-                }
                 if (!isValidDate(endTime)) {
                     endTime = new Date();
                 }
-                this.duration = endTime.getTime() - startTime.getTime();
-                this.startTimestamp = startTime.getTime();
+                this.duration = endTime.getTime() - new Date().getTime();
                 this.endTimestamp = endTime.getTime();
             } else {
                 // else calculate the endTime by duration
-                this.startTimestamp = new Date().getTime();
-                this.endTimestamp = this.startTimestamp + this.duration;
+                this.endTimestamp = new Date().getTime() + this.duration;
             }
 
             if (this.duration > 0) {
-                clearTimeout(this.timeout);
-                this.countDown(duration => {
-                    if (duration <= 0) {
-                        if (this.onTimeout &&
-                            typeof this.onTimeout === 'function') {
-                            this.onTimeout();
-                        }
-                        this.duration = 0;
+                this.updateCountDown(this.duration);
+                this.countDown(() => {
+                    if (this.onTimeout && typeof this.onTimeout === 'function') {
+                        this.onTimeout();
                     }
-                    this.updateCountDown(this.duration);
                 });
             } else {
                 this.duration = 0;
-                this.updateCountDown(0);
             }
         }
     };
