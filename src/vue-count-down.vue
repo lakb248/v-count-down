@@ -129,7 +129,7 @@
         };
     };
 
-    const SPEED = 800;
+    const SPEED = 400;
 
     export default {
         props: ['endTime', 'duration', 'onTimeout'],
@@ -168,38 +168,43 @@
                     }
                 } else {
                     this.timeout = setTimeout(() => {
-                        this.updateCountDown(this.duration);
+                        this.updateCountDown(this.duration, true);
                         this.countDown(callback);
                     }, nextTime);
                 }
             },
-            updateCountDown(duration) {
+            updateCountDown(duration, withAnimation) {
                 console.log('update:', duration);
-                var formatedDuration = formatMillisecond(duration);
+                var formatedDuration = formatMillisecond(duration, withAnimation);
                 for (var key in formatedDuration) {
                     if (formatedDuration.hasOwnProperty(key)) {
-                        this.renderCountDown(key, 0, formatedDuration[key][0]);
-                        this.renderCountDown(key, 1, formatedDuration[key][1]);
+                        this.renderCountDown(key, 0, formatedDuration[key][0], withAnimation);
+                        this.renderCountDown(key, 1, formatedDuration[key][1], withAnimation);
                     }
                 }
             },
-            renderCountDown(unit, bit, val) {
+            renderCountDown(unit, bit, val, withAnimation) {
                 var countDownUI = this.$el.querySelectorAll('.count-down-' + unit)[bit];
                 var top = countDownUI.querySelector('.top');
                 var nextCounts = countDownUI.querySelectorAll('.next-count');
                 var currentCounts = countDownUI.querySelectorAll('.current-count');
 
                 if (val !== +currentCounts[0].innerHTML) {
-                    top.style.transition = 'transform ' + SPEED / 1000 + 's linear';
-                    top.style.transform = 'rotateX(180deg)';
-                    nextCounts[0].innerHTML = val;
-                    nextCounts[1].innerHTML = val;
-                    setTimeout(function () {
+                    if (withAnimation) {
+                        top.style.transition = 'transform ' + SPEED / 1000 + 's linear';
+                        top.style.transform = 'rotateX(180deg)';
+                        nextCounts[0].innerHTML = val;
+                        nextCounts[1].innerHTML = val;
+                        setTimeout(function () {
+                            currentCounts[0].innerHTML = val;
+                            currentCounts[1].innerHTML = val;
+                            top.style.transition = 'none';
+                            top.style.transform = 'rotateX(0deg)';
+                        }, SPEED);
+                    } else {
                         currentCounts[0].innerHTML = val;
                         currentCounts[1].innerHTML = val;
-                        top.style.transition = 'none';
-                        top.style.transform = 'rotateX(0deg)';
-                    }, SPEED);
+                    }
                 }
             }
         },
@@ -218,7 +223,7 @@
             }
 
             if (this.duration > 0) {
-                this.updateCountDown(this.duration);
+                this.updateCountDown(this.duration, false);
                 this.countDown(() => {
                     if (this.onTimeout && typeof this.onTimeout === 'function') {
                         this.onTimeout();
