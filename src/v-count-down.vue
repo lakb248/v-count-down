@@ -121,7 +121,11 @@
         // var days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
         var hours = Math.floor(milliseconds / (1000 * 60 * 60)) % 24;
         var minutes = Math.floor(milliseconds / (1000 * 60)) % 60;
-        var seconds = Math.ceil(milliseconds / 1000) % 60;
+        if (milliseconds % 1000 === 0) {
+            var seconds = Math.floor(milliseconds / 1000) % 60 - 1;
+        } else {
+            var seconds = Math.floor(milliseconds / 1000) % 60;
+        }
         return {
             // days: days,
             hour: hours >= 10 ? [Math.floor(hours/10), hours % 10] : [0, hours],
@@ -160,11 +164,9 @@
                 if (nextTime < 0) {
                     nextTime = 0;
                 }
-
                 if (this.duration <= 0) {
                     clearTimeout(this.timeout);
                     if (callback && typeof callback === 'function') {
-                        this.updateCountDown(0, true);
                         callback(this.duration);
                     }
                 } else {
