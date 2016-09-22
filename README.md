@@ -1,6 +1,9 @@
 # v-count-down
 > A count down component implement by vuejs
 
+## Demo
+[Demo](https://lakb248.github.io/v-count-down/)
+
 ## Usage
 
 ### Install
