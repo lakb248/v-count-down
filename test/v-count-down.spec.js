@@ -1,6 +1,6 @@
 /* global describe, it, expect */
 import Vue from 'vue';
-import vueCountDown from '../src/vue-count-down.vue';
+import vueCountDown from '../src/v-count-down.vue';
 
 describe('vue-count-down.vue', () => {
     it('should have correct text', () => {

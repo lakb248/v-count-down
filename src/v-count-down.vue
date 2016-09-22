@@ -94,13 +94,15 @@
 </template>
 
 <script>
+    // const OBJECT_TYPE = 'object';
+    // const FUNCTION_TYPE = 'function';
     /**
      * whether the given date is a valid date object
      * @param  {Date}  date the given date
      * @return {Boolean} the result
      */
-    var isValidDate = date => {
-        if (typeof date === 'object') {
+    var isValidDate = function (date) {
+        if (date.getTime) {
             if (isNaN(date.getTime())) {
                 return false;
             }
@@ -153,7 +155,6 @@
                     var offset = new Date().getTime() - this.baseTimestamp - (this.count - 1) * this.interval;
                     nextTime = this.interval - offset;
                     this.duration -= this.interval;
-
                 }
                 this.count ++;
                 if (nextTime < 0) {
@@ -163,6 +164,7 @@
                 if (this.duration <= 0) {
                     clearTimeout(this.timeout);
                     if (callback && typeof callback === 'function') {
+                        this.updateCountDown(0, true);
                         callback(this.duration);
                     }
                 } else {

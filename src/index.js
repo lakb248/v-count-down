@@ -1,3 +1,3 @@
-import vueCountDown from './vue-count-down.vue';
+import vueCountDown from './v-count-down.vue';
 
 module.exports = vueCountDown;

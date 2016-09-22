@@ -1,8 +1,8 @@
 {
-  "name": "vue-count-down",
+  "name": "v-count-down",
   "version": "0.0.1",
   "description": "A count down component implement by vuejs",
-  "main": "./dist/vue-count-down.min.js",
+  "main": "./dist/v-count-down.min.js",
   "scripts": {
     "dev": "webpack-dashboard -p 3001 -- webpack-dev-server --watch --progress --config webpack.dev.config.js --port 8888",
     "build": "webpack --progress --config webpack.prod.config.js",
