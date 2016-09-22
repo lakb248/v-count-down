@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import vueCountDown from './src/vue-count-down.vue';
+import vueCountDown from './src/v-count-down.vue';
 
 new Vue({
     el: '#container',
