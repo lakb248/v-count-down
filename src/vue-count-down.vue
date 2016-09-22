@@ -120,7 +120,6 @@
         var hours = Math.floor(milliseconds / (1000 * 60 * 60)) % 24;
         var minutes = Math.floor(milliseconds / (1000 * 60)) % 60;
         var seconds = Math.ceil(milliseconds / 1000) % 60;
-        console.log(seconds);
         return {
             // days: days,
             hour: hours >= 10 ? [Math.floor(hours/10), hours % 10] : [0, hours],
@@ -174,7 +173,6 @@
                 }
             },
             updateCountDown(duration, withAnimation) {
-                console.log('update:', duration);
                 var formatedDuration = formatMillisecond(duration, withAnimation);
                 for (var key in formatedDuration) {
                     if (formatedDuration.hasOwnProperty(key)) {
@@ -223,6 +221,7 @@
             }
 
             if (this.duration > 0) {
+                // first update count down without animation to avoid initial flash
                 this.updateCountDown(this.duration, false);
                 this.countDown(() => {
                     if (this.onTimeout && typeof this.onTimeout === 'function') {
