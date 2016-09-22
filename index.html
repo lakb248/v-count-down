@@ -8,6 +8,15 @@
         <div id="container">
             <vue-count-down end-time="2016-09-21 20:55:00"></vue-count-down>
         </div>
-        <script type="text/javascript" src="/build/build.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/vue/1.0.26/vue.min.js"></script>
+        <script type="text/javascript" src="./dist/v-count-down.min.js"></script>
+        <script type="text/javascript">
+            new Vue({
+                el: '#container',
+                components: {
+                    'vue-count-down': VueCountDown
+                }
+            });
+        </script>
     </body>
 </html>
