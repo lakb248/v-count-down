@@ -8,7 +8,7 @@ var path = require('path');
 config.entry = './src/index.js';
 config.output = {
     path: path.resolve('dist') + '/',
-    filename: 'vue-count-down.min.js',
+    filename: 'v-count-down.min.js',
     library: 'VueCountDown',
     libraryTarget: 'umd'
 };
