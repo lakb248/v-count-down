@@ -164,7 +164,7 @@
                 if (this.duration <= 0) {
                     clearTimeout(this.timeout);
                     if (callback && typeof callback === 'function') {
-                        this.updateCountDown(0, true);
+                        // this.updateCountDown(0, true);
                         callback(this.duration);
                     }
                 } else {
