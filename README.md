@@ -1,4 +1,5 @@
 # v-count-down
+[![Build Status](https://travis-ci.org/lakb248/v-count-down.svg?branch=master)](https://travis-ci.org/lakb248/v-count-down)
 > A count down component implement by vuejs
 
 ## Demo
