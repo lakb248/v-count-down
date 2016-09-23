@@ -1,5 +1,7 @@
 # v-count-down
 [![Build Status](https://travis-ci.org/lakb248/v-count-down.svg?branch=master)](https://travis-ci.org/lakb248/v-count-down)
+[![codecov](https://codecov.io/gh/lakb248/v-count-down/branch/master/graph/badge.svg)](https://codecov.io/gh/lakb248/v-count-down)
+
 > A count down component implement by vuejs
 
 ## Demo
