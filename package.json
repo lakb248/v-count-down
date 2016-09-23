@@ -1,6 +1,6 @@
 {
   "name": "v-count-down",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A count down component implement by vuejs",
   "main": "./dist/v-count-down.min.js",
   "scripts": {
