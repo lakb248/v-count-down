@@ -9,6 +9,13 @@
     "test": "karma start karma.config.js",
     "ci": "npm run test && npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lakb248/v-count-down.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lakb248/v-count-down/issues"
+  },
   "keywords": [
     "vue-component",
     "vuejs",
