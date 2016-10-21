@@ -1,5 +1,5 @@
 <template>
-    <div class="count-down-container" v-bind:class="{'finished': duration <= 0}">
+    <div class="count-down-container" v-bind:class="{'finished': remain <= 0}">
         <div class="count-down-group">
             <div class="count-down-hour count-down-item">
                 <div class="count-down-number">
@@ -144,6 +144,7 @@
                 timeout: -1,
                 interval: 1000,
                 count: 0,
+                remain: this.duration,
                 baseTimestamp: new Date().getTime()
             };
         },
@@ -152,26 +153,26 @@
                 var nextTime = 0;
                 if (this.count === 0) {
                     // ths startTime need to be calibrated on first count down
-                    nextTime = this.duration % 1000;
+                    nextTime = this.remain % 1000;
                     this.baseTimestamp +=  nextTime;
-                    this.duration -= nextTime;
+                    this.remain -= nextTime;
                 } else {
                     var offset = new Date().getTime() - this.baseTimestamp - (this.count - 1) * this.interval;
                     nextTime = this.interval - offset;
-                    this.duration -= this.interval;
+                    this.remain -= this.interval;
                 }
                 this.count ++;
                 if (nextTime < 0) {
                     nextTime = 0;
                 }
-                if (this.duration <= 0) {
+                if (this.remain <= 0) {
                     clearTimeout(this.timeout);
                     if (callback && typeof callback === 'function') {
-                        callback(this.duration);
+                        callback(this.remain);
                     }
                 } else {
                     this.timeout = setTimeout(() => {
-                        this.updateCountDown(this.duration, true);
+                        this.updateCountDown(this.remain, true);
                         this.countDown(callback);
                     }, nextTime);
                 }
@@ -210,30 +211,32 @@
                 }
             }
         },
-        ready() {
+        mounted() {
             // if duration is not given, use endTime to calculate the duration
-            if (!this.duration) {
+            if (!this.remain) {
                 var endTime = new Date(this.endTime);
                 if (!isValidDate(endTime)) {
                     endTime = new Date();
                 }
-                this.duration = endTime.getTime() - new Date().getTime();
+                this.remain = endTime.getTime() - new Date().getTime();
                 this.endTimestamp = endTime.getTime();
             } else {
                 // else calculate the endTime by duration
-                this.endTimestamp = new Date().getTime() + this.duration;
+                this.endTimestamp = new Date().getTime() + this.remain;
             }
 
-            if (this.duration > 0) {
-                // first update count down without animation to avoid initial flash
-                this.updateCountDown(this.duration, false);
-                this.countDown(() => {
-                    if (this.onTimeout && typeof this.onTimeout === 'function') {
-                        this.onTimeout();
-                    }
+            if (this.remain > 0) {
+                this.$nextTick(() => {
+                    // first update count down without animation to avoid initial flash
+                    this.updateCountDown(this.remain, false);
+                    this.countDown(() => {
+                        if (this.onTimeout && typeof this.onTimeout === 'function') {
+                            this.onTimeout();
+                        }
+                    });
                 });
             } else {
-                this.duration = 0;
+                this.remain = 0;
             }
         }
     };

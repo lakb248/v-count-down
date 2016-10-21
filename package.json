@@ -4,7 +4,7 @@
   "description": "A count down component implement by vuejs",
   "main": "./dist/v-count-down.min.js",
   "scripts": {
-    "dev": "webpack-dashboard -p 3001 -- webpack-dev-server --watch --progress --config webpack.dev.config.js --port 8888",
+    "dev": "webpack-dev-server --watch --progress --config webpack.dev.config.js --port 8888",
     "build": "webpack --progress --config webpack.prod.config.js",
     "test": "karma start karma.config.js",
     "ci": "npm run test && npm run build && codecov -t 12f4a758-2ef7-4b94-a7bb-2e866c12dab7 coverage/cobertura-coverage.xml"
@@ -24,7 +24,7 @@
   "author": "lakb248@gmail.com",
   "license": "ISC",
   "dependencies": {
-    "vue": "^1.0.26"
+    "vue": "^2.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.5.2",
@@ -61,8 +61,7 @@
     "vue-html-loader": "^1.1.0",
     "vue-loader": "^8.1.3",
     "vue-style-loader": "^1.0.0",
-    "webpack": "^1.13.2",
-    "webpack-dashboard": "^0.1.8",
+    "webpack": "^2.1.0-beta.2",
     "webpack-dev-server": "^1.15.0",
     "webpack-merge": "^0.14.1"
   }

@@ -15,5 +15,10 @@ module.exports = {
             test: /\.(png|jpg)$/,
             loader: 'url-loader?limit=8192'
         }]
+    },
+    resolve: {
+        alias: {
+            'vue': 'vue/dist/vue.js'
+        }
     }
 };
