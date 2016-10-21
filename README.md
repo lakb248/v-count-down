@@ -15,6 +15,12 @@
 npm install v-count-down --save
 ```
 
+And, if you are using vue 2.0
+
+```bash
+npm install v-count-down@next --save
+```
+
 ### CommonJS
 
 ```javascript
